@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.next
+out
+dist
+build
+
+# Git
+.git
+.gitignore
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Terraform
+terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Kubernetes and GitOps
+kubernetes/
+argocd/
+
+# CI/CD and monitoring
+monitoring/
+
+# Logs and temporary files
+*.log
+coverage/
+.cache/
+.npm/
+
+# Documentation and Docker metadata
+README.md
+Dockerfile
+.dockerignore

@@ -1,0 +1,54 @@
+services:
+  qbs-mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Required}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Required}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - qb-network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'mongosh --quiet --username "$$MONGO_INITDB_ROOT_USERNAME" --password "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand({ping:1}).ok"'
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  migration:
+    image: qb-ecommerce-migration:v1
+    environment:
+      MONGODB_URI: ${MONGODB_URI:?Required}
+    depends_on:
+      qbs-mongodb:
+        condition: service_healthy
+    networks:
+      - qb-network
+    restart: "no"
+
+  qb-ecommerce:
+    image: qb-ecommerce:v1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: ${MONGODB_URI:?Required}
+      JWT_SECRET: ${JWT_SECRET:?Required}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Required}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    networks:
+      - qb-network
+
+networks:
+  qb-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

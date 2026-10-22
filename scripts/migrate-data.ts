@@ -50,7 +50,7 @@ function getImagePath(originalPath: string, shopCategory: string): string {
 
 async function migrateData() {
   try {
-    console.log('Attempting to connect to MongoDB at:', MONGODB_URI);
+    console.log('Attempting to connect to MongoDB...');
     
     // Connect to MongoDB with options
     await mongoose.connect(MONGODB_URI, {
@@ -70,9 +70,15 @@ async function migrateData() {
     );
     const data = JSON.parse(jsonData);
 
-    // Clear existing products
-    await Product.deleteMany({});
-    console.log('Cleared existing products');
+    // Protect existing product data
+    const existingProducts = await Product.countDocuments();
+
+    if (existingProducts > 0) {
+      console.log(`Migration skipped: ${existingProducts} products already exist.`);
+      return;
+    } 
+
+    console.log('Product collection is empty. Starting initial import.');
 
     // Create a map to track used IDs
     const usedIds = new Set<string>();
@@ -93,9 +99,9 @@ async function migrateData() {
       );
 
       return {
+        ...product,
         _id: paddedId,
         originalId: paddedId,
-        ...product,
         image: fixedImages
       };
     });
@@ -106,7 +112,8 @@ async function migrateData() {
 
     console.log('Migration completed successfully');
   } catch (error) {
-    console.error('Migration failed:', error);
+  console.error('Migration failed:', error);
+  process.exitCode = 1;
   } finally {
     await mongoose.disconnect();
   }
