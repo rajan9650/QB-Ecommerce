@@ -107,3 +107,14 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 qualibytes-key.pub
 qualibytes-key
+
+# Terraform provider lock file should be committed
+!terraform/.terraform.lock.hcl
+
+# AWS CLI installation files (not application source)
+/aws/
+/awscliv2.zip
+
+# Terraform generated plan files
+terraform/tfplan
+terraform/*.tfplan
