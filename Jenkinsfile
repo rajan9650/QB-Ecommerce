@@ -14,11 +14,12 @@ pipeline {
             }
         }
 
-        stage('Check Node and npm') {
+        stage('Check Node, npm and Docker') {
             steps {
                 sh '''
                     node --version
                     npm --version
+                    docker --version
                 '''
             }
         }
@@ -34,14 +35,39 @@ pipeline {
                 sh 'npm run build'
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t rajan9650/qb-ecommerce:v3 .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKERHUB_USERNAME',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    sh '''
+                        set +x
+                        echo "$DOCKERHUB_TOKEN" | docker login \
+                            --username "$DOCKERHUB_USERNAME" \
+                            --password-stdin
+                        docker push rajan9650/qb-ecommerce:v3
+                        docker logout
+                    '''
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'QB-Ecommerce CI pipeline completed successfully.'
+            echo 'CI/CD image build and Docker Hub push completed successfully.'
         }
         failure {
-            echo 'QB-Ecommerce CI pipeline failed. Check the console output.'
+            echo 'Pipeline failed. Check the console output.'
         }
     }
 }
