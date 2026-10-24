@@ -5,6 +5,8 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import ShopCategories from "@/components/ShopCategories";
 import HeroSlider from "@/components/heros/HeroSlider";
 
+export const dynamic = "force-dynamic";
+
 const heroImages = [
   {
     bgImg: "/heroImages/clothing1.png",

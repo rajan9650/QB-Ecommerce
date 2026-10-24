@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qb-ecommerce-migration
+  namespace: qbshop
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: qb-ecommerce-migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: rajan9650/qb-ecommerce-migration:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: qbshop-secrets
+                  key: MONGODB_URI
