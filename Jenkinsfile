@@ -60,7 +60,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                    set -e
+
+                    kubectl set image deployment/qb-ecommerce \
+                      qb-ecommerce=rajan9650/qb-ecommerce:v3 \
+                      -n qbshop
+
+                    kubectl rollout status deployment/qb-ecommerce \
+                      -n qbshop --timeout=180s
+
+                    kubectl get deployment qb-ecommerce -n qbshop
+                '''
+            }
+        }
+
+
     }
+
+
 
     post {
         success {
