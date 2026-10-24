@@ -7,10 +7,6 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    environment {
-        NODE_ENV = 'production'
-    }
-
     stages {
         stage('Checkout') {
             steps {
