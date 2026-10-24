@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/lib/models/product';
 
+export const dynamic = 'force-dynamic';
+
 // Map frontend categories to database categories
 const categoryMap: { [key: string]: string } = {
   electronics: 'gadgets',

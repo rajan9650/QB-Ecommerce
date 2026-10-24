@@ -1,12 +1,17 @@
-import fetchData from "@/lib/fetchDataFromApi";
+
+import dbConnect from "@/lib/db";
+import Product from "@/lib/models/product";
 import Link from "next/link";
 import BooksSlider from "./sliders/BooksSlider";
 
 const BooksCategory = async () => {
   try {
-    const res = await fetchData.get("/products/books");
+    await dbConnect();
 
-    const books = (res.data.products as BooksProduct[]) || [];
+    const books = await Product.find({ shop_category: "books" })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
 
     return (
       <section className="books-category pt-20">
@@ -16,19 +21,19 @@ const BooksCategory = async () => {
               Best Sellers in Books
             </h1>
             <Link
-              href={"/shops/books"}
+              href="/shops/books"
               className="hover:underline text-primary"
             >
               View Shop
             </Link>
           </div>
 
-          <BooksSlider books={books} />
+          <BooksSlider books={JSON.parse(JSON.stringify(books))} />
         </div>
       </section>
     );
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error loading books:", error);
     return <div>Error loading books</div>;
   }
 };
