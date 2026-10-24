@@ -38,7 +38,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t rajan9650/qb-ecommerce:v3 .'
+                sh '''
+                    docker build \
+                      -t rajan9650/qb-ecommerce:build-${BUILD_NUMBER} .
+                '''
             }
         }
 
@@ -54,7 +57,7 @@ pipeline {
                         echo "$DOCKERHUB_TOKEN" | docker login \
                             --username "$DOCKERHUB_USERNAME" \
                             --password-stdin
-                        docker push rajan9650/qb-ecommerce:v3
+                        docker push rajan9650/qb-ecommerce:build-${BUILD_NUMBER}
                         docker logout
                     '''
                 }
@@ -67,7 +70,7 @@ pipeline {
                     set -e
 
                     kubectl set image deployment/qb-ecommerce \
-                      qb-ecommerce=rajan9650/qb-ecommerce:v3 \
+                      qb-ecommerce=rajan9650/qb-ecommerce:build-${BUILD_NUMBER} \
                       -n qbshop
 
                     kubectl rollout status deployment/qb-ecommerce \
